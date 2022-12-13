@@ -8,26 +8,34 @@ const redisClient = redis.createClient({
     legacyMode: true 
 });
 
-redisClient.on("error", function(err) {
-    console.log("Error " + err);
-});
+redisClient.on("error", (err) => console.log("Error " + err));
 
-redisClient.connect()
+(async () => {
+    await redisClient.connect();
+  
+    // Sets the key "octocat" to a value of "Mona the octocat"
+    const setKeyReply = await redisClient.set("octocat", "Mona the Octocat");
+    console.log("Reply: ", setKeyReply);
+    // Sets a key to "species", field to "octocat", and "value" to "Cat and Octopus"
+    const SetFieldOctocatReply = await redisClient.hSet("species", "octocat", "Cat and Octopus");
+    console.log("Reply: ", SetFieldOctocatReply);
+    // Sets a key to "species", field to "dinotocat", and "value" to "Dinosaur and Octopus"
+    const SetFieldDinotocatReply = await redisClient.hSet("species", "dinotocat", "Dinosaur and Octopus");
+    console.log("Reply: ", SetFieldDinotocatReply);
+    // Sets a key to "species", field to "robotocat", and "value" to "Cat and Robot"
+    const SetFieldRobotocatReply = await redisClient.hSet("species", "robotocat", "Cat and Robot");
+    console.log("Reply: ", SetFieldRobotocatReply);
 
-// Sets the key "octocat" to a value of "Mona the octocat"
-redisClient.set("octocat", "Mona the Octocat", function (err, reply) { console.log("Reply: ", reply) });
-// Sets a key to "species", field to "octocat", and "value" to "Cat and Octopus"
-redisClient.hset("species", "octocat", "Cat and Octopus", function (err, reply) { console.log("Reply: ", reply) });
-// Sets a key to "species", field to "dinotocat", and "value" to "Dinosaur and Octopus"
-redisClient.hset("species", "dinotocat", "Dinosaur and Octopus", function (err, reply) { console.log("Reply: ", reply) });
-// Sets a key to "species", field to "robotocat", and "value" to "Cat and Robot"
-redisClient.hset(["species", "robotocat", "Cat and Robot"], function (err, reply) { console.log("Reply: ", reply) });
-
-// Gets all fields in "species" key
-redisClient.hkeys("species", function (err, replies) {
-    console.log(replies.length + " replies:");
-    replies.forEach(function (reply, i) {
-        console.log("    " + i + ": " + reply);
-    });
-    redisClient.disconnect();
-});
+    try {
+      // Gets all fields in "species" key
+      const replies = await redisClient.hKeys("species");
+      console.log(replies.length + " replies:");
+      replies.forEach((reply, i) => {
+          console.log("    " + i + ": " + reply);
+      });
+      await redisClient.quit();
+    }
+    catch (err) {
+      // statements to handle any exceptions
+    }
+  })();
